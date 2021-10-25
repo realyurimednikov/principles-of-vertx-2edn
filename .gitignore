@@ -23,3 +23,6 @@
 
 .vscode/
 .idea/
+.classpath
+.project
+.settings/
