@@ -13,16 +13,28 @@ import io.vertx.junit5.Checkpoint;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import net.yurimednikov.vertxbook.cashx.models.Category;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @ExtendWith(VertxExtension.class)
+@Testcontainers
 class CategoryMongoRepositoryImplTest {
     
     private CategoryMongoRepositoryImpl repository;
 
+    @Container
+    private MongoDBContainer mongoContainer = new MongoDBContainer(DockerImageName.parse("mongo:focal"));
+
     @BeforeEach
     void setup(Vertx vertx, VertxTestContext context){
         JsonObject config = new JsonObject();
-        config.put("connection_string", "");
+        String dbHost = mongoContainer.getHost();
+        Integer dbPort = mongoContainer.getFirstMappedPort();
+
+        config.put("port", dbPort);
+        config.put("host", dbHost);
 
         MongoClient client = MongoClient.createShared(vertx, config);
         repository = new CategoryMongoRepositoryImpl(client);

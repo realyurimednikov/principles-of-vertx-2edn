@@ -18,20 +18,43 @@ import io.vertx.junit5.VertxTestContext;
 import net.yurimednikov.vertxbook.cashx.models.Category;
 import net.yurimednikov.vertxbook.cashx.models.Operation;
 import net.yurimednikov.vertxbook.cashx.models.OperationAmount;
+import org.testcontainers.containers.MongoDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 @ExtendWith(VertxExtension.class)
+@Testcontainers
 class OperationMongoRepositoryImplTest {
 
     private OperationMongoRepositoryImpl repository;
+    private CategoryMongoRepositoryImpl categoryRepository;
+    private Category category;
+
+    @Container
+    private MongoDBContainer mongoContainer = new MongoDBContainer(DockerImageName.parse("mongo:focal"));
 
     @BeforeEach
     void setup(Vertx vertx, VertxTestContext context){
         JsonObject config = new JsonObject();
-        config.put("connection_string", "");
+        String dbHost = mongoContainer.getHost();
+        Integer dbPort = mongoContainer.getFirstMappedPort();
+
+        config.put("port", dbPort);
+        config.put("host", dbHost);
 
         MongoClient client = MongoClient.createShared(vertx, config);
         repository = new OperationMongoRepositoryImpl(client);
-        context.completeNow();
+        categoryRepository = new CategoryMongoRepositoryImpl(client);
+
+        client.createCollection("categories")
+                .compose(r -> {
+                    Category c = new Category(null, "user", "Income from selling stuff", "income");
+                    return categoryRepository.saveCategory(c);
+                }).onSuccess(result -> {
+                    this.category = result;
+                    context.completeNow();
+                }).onFailure(context::failNow);
     }
     
     @Test
@@ -39,13 +62,12 @@ class OperationMongoRepositoryImplTest {
         Operation operation = new Operation(null, 
             "user", "Just an operation", LocalDateTime.now(), 
             new OperationAmount("EUR", new BigDecimal("100")), 
-            new Category("6167fce9a2a7173c209d85d2", "user", "Income from selling stuff", "income"), 
+            this.category,
             "account");
 
         context.verify(() -> {
             repository.saveOperation(operation)
                 .onSuccess(result -> {
-                    System.out.println(result.id());
                     Assertions.assertNotNull(result.id());
                     context.completeNow();
                 })
@@ -58,7 +80,7 @@ class OperationMongoRepositoryImplTest {
         Operation operation = new Operation(null, 
             "user", "Just an operation", LocalDateTime.now(), 
             new OperationAmount("EUR", new BigDecimal("100")), 
-            new Category("6167fce9a2a7173c209d85d2", "user", "Income from selling stuff", "income"), 
+            this.category,
             "account");
         
         Checkpoint saveCheckpoint = context.checkpoint();
@@ -83,8 +105,8 @@ class OperationMongoRepositoryImplTest {
     void findOperationByIdTest(Vertx vertx, VertxTestContext context){
         Operation operation = new Operation(null, 
         "user", "Just an operation", LocalDateTime.now(), 
-        new OperationAmount("EUR", new BigDecimal("100")), 
-        new Category("6167fce9a2a7173c209d85d2", "user", "Salary", "income"), 
+        new OperationAmount("EUR", new BigDecimal("100")),
+        this.category,
         "account");
     
     Checkpoint saveCheckpoint = context.checkpoint();

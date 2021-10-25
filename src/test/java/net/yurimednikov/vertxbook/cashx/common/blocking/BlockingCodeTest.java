@@ -1,4 +1,4 @@
-package net.yurimednikov.vertxbook.cashx.blocking;
+package net.yurimednikov.vertxbook.cashx.common.blocking;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
