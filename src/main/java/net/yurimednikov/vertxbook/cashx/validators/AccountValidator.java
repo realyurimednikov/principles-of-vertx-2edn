@@ -13,7 +13,20 @@ public class AccountValidator {
         JsonArray messages = new JsonArray();
         
         try {
-            long id = json.getLong("id");
+            if (json.isEmpty()) {
+                JsonObject message = new JsonObject();
+                message.put("message", "Invalid or empty data");
+                messages.add(message);
+                throw new ValidatorException(messages);
+            }
+
+            long id;
+
+            if (json.getLong("id") == null) {
+                id = 0;
+            } else {
+                id = json.getLong("id");
+            }
 
             if (json.getLong("userId") == null) {
                 JsonObject message = new JsonObject();
@@ -40,7 +53,6 @@ public class AccountValidator {
             String name = json.getString("name");
 
             Account account = new Account(id, name, currency, userId);
-            System.out.println("Validation passed");
             return Future.succeededFuture(account);
         } catch (ValidatorException exception){
             return Future.failedFuture(new ValidatorException(exception.getMessages()));
