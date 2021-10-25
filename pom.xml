@@ -44,14 +44,10 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-config</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-auth-jwt</artifactId>
-    </dependency>
-    <!-- <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-sql-client-templates</artifactId>
-    </dependency> -->
+<!--    <dependency>-->
+<!--      <groupId>io.vertx</groupId>-->
+<!--      <artifactId>vertx-auth-jwt</artifactId>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
@@ -60,11 +56,10 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-pg-client</artifactId>
     </dependency>
-    <dependency>
-      <groupId>io.vertx</groupId>
-      <artifactId>vertx-mail-client</artifactId>
-    </dependency>
-
+<!--    <dependency>-->
+<!--      <groupId>io.vertx</groupId>-->
+<!--      <artifactId>vertx-mail-client</artifactId>-->
+<!--    </dependency>-->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-junit5</artifactId>
@@ -82,26 +77,11 @@
       <version>${junit-jupiter.version}</version>
       <scope>test</scope>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.konghq/unirest-java -->
-    <!-- <dependency>
-        <groupId>com.konghq</groupId>
-        <artifactId>unirest-java</artifactId>
-        <version>3.13.0</version>
-    </dependency> -->
-    <!-- https://mvnrepository.com/artifact/org.jooq/jooq -->
-    <!-- <dependency>
-        <groupId>org.jooq</groupId>
-        <artifactId>jooq</artifactId>
-        <version>3.15.3</version>
-    </dependency> -->
-    <!-- https://mvnrepository.com/artifact/com.google.inject/guice -->
       <dependency>
           <groupId>com.google.inject</groupId>
           <artifactId>guice</artifactId>
           <version>5.0.1</version>
       </dependency>
-
-
 
     <dependency>
     <groupId>io.vertx</groupId>
@@ -113,24 +93,17 @@
       <artifactId>jackson-databind</artifactId>
       <version>2.9.10.3</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
     <dependency>
         <groupId>org.mockito</groupId>
         <artifactId>mockito-junit-jupiter</artifactId>
         <version>4.0.0</version>
         <scope>test</scope>
     </dependency>
-    <!-- <dependency>
+    <dependency>
         <groupId>am.ik.yavi</groupId>
         <artifactId>yavi</artifactId>
         <version>0.9.1</version>
-    </dependency> -->
-    <!-- https://mvnrepository.com/artifact/io.vertx/vertx-web-graphql -->
-    <!-- <dependency>
-        <groupId>io.vertx</groupId>
-        <artifactId>vertx-web-graphql</artifactId>
-        <version>4.2.0.Beta1</version>
-    </dependency> -->
+    </dependency>
       <dependency>
           <groupId>commons-net</groupId>
           <artifactId>commons-net</artifactId>
@@ -142,7 +115,6 @@
           <version>3.0.0</version> 
           <scope>test</scope> 
       </dependency>
-      <!-- https://mvnrepository.com/artifact/com.konghq/unirest-java -->
       <dependency>
           <groupId>com.konghq</groupId>
           <artifactId>unirest-java</artifactId>
@@ -171,12 +143,6 @@
           <version>1.16.2</version>
           <scope>test</scope>
         </dependency>
-
-
-
-
-
-
   </dependencies>
 
   <build>
