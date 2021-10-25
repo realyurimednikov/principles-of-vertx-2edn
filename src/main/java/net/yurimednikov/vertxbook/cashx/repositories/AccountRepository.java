@@ -15,8 +15,6 @@ public interface AccountRepository {
 
     Future<AccountList> findAccounts (Long userId);
 
-    Future<PagedAccountList> findAccountsWithPagination (Long userId, Pagination pagination);
-
     Future<Boolean> removeAccount (Long accountId);
 
     Future<Account> updateAccount (Account account);

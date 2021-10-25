@@ -14,12 +14,25 @@ import net.yurimednikov.vertxbook.cashx.models.Account;
 import net.yurimednikov.vertxbook.cashx.models.AccountList;
 import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
 
-public class AccountSimplePgRepositoryImpl implements AccountRepository{
+public class AccountReactivePgRepositoryImpl implements AccountRepository{
 
     private final SqlClient client;
 
-    public AccountSimplePgRepositoryImpl(SqlClient client){
+    public AccountReactivePgRepositoryImpl(SqlClient client){
         this.client = client;
+    }
+
+    public Future<Void> createTable(){
+        String createTableQuery = """
+                CREATE TABLE "accounts" (
+                account_id serial PRIMARY KEY,
+                account_name varchar(200) NOT NULL,
+                account_currency varchar(3) NOT NULL,
+                account_userid INTEGER
+                );
+                """;
+
+        return client.query(createTableQuery).execute().compose(r -> Future.succeededFuture());
     }
 
     @Override
@@ -122,19 +135,6 @@ public class AccountSimplePgRepositoryImpl implements AccountRepository{
             }
         });
     }
-    
-    // Mapper
-    // class AccountRowMapper {
-
-    //     Account toEntity(Row row) {
-    //         long id = row.getLong("account_id");
-    //         String name = row.getString("account_name");
-    //         String currency = row.getString("account_currency");
-    //         long userId = row.getLong("account_userid");
-    //         return new Account(id, name, currency, userId);
-    //     }
-
-    // }
 
     @Override
     public Future<AccountList> saveManyAccounts(AccountList accounts) {
@@ -163,9 +163,4 @@ public class AccountSimplePgRepositoryImpl implements AccountRepository{
         return result;
     }
 
-    @Override
-    public Future<PagedAccountList> findAccountsWithPagination(Long userId, Pagination pagination) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 }
