@@ -3,6 +3,7 @@ package net.yurimednikov.vertxbook.cashx.verticles;
 import java.util.List;
 import java.util.Optional;
 
+import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,15 +41,7 @@ class AccountsRestVerticleTest {
     void setup (Vertx vertx, VertxTestContext context){
         AccountsRestVerticle verticle = new AccountsRestVerticle(controller);
         client = WebClient.create(vertx);
-        vertx.deployVerticle(verticle, result -> {
-            if (result.succeeded()){
-                System.out.println("Verticle deployed");
-                context.completeNow();
-            } else {
-                System.out.println("Error happened");
-                context.failNow(result.cause());
-            }
-        });
+        vertx.deployVerticle(verticle).onFailure(context::failNow).onSuccess(r -> context.completeNow());
     }
 
     @Test
@@ -87,6 +80,21 @@ class AccountsRestVerticleTest {
                     Assertions.assertEquals(400, responseCode);
                     context.completeNow();
                 });
+        });
+    }
+
+    @Test
+    void createAccountValidationFailedResponsePredicatesEndpointTest(Vertx vertx, VertxTestContext context){
+        JsonObject payload = new JsonObject();
+        payload.put("name", "Account name");
+        payload.put("userId", 1);
+        payload.put("id", 0);
+        context.verify(() -> {
+            client.postAbs("http://localhost:8080/api/accounts/1")
+                    .expect(ResponsePredicate.status(400))
+                    .sendJsonObject(payload)
+                    .onFailure(context::failNow)
+                    .onSuccess(result -> context.completeNow());
         });
     }
 
