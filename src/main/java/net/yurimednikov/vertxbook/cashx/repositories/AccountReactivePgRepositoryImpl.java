@@ -67,24 +67,23 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
         // Set up a tuple
         Tuple tuple = Tuple.of(accountId);
         // Run query
-        Future<Optional<Account>> result = client.preparedQuery(sql)
-            .mapping(mapper::apply)
+        return client.preparedQuery(sql)
+            .mapping(mapper)
             .execute(tuple)
-            .flatMap(rows -> {
+            .map(rows -> {
                 // Assert results
                 if (rows.rowCount() == 0) {
-                    return Future.succeededFuture(Optional.empty());
+                    return Optional.empty();
                 }
                 Account account = rows.iterator().next();
-                return Future.succeededFuture(Optional.of(account));
+                return Optional.of(account);
             });
-        return result;
     }
 
     @Override
     public Future<AccountList> findAccounts(Long userId) {
         // 1. Create prepared statement
-        String sql = "SELECT * FROM accounts WHERE account_userid = $1;";
+        String sql = "SELECT * FROM accounts WHERE account_userid = $1 ORDER BY account_id;";
 
         // 2, Set up tuple
         Tuple tuple = Tuple.of(userId);
@@ -92,16 +91,15 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
         AccountRowMapper rowMapper = new AccountRowMapper();
 
         // 3. Run query
-        Future<AccountList> result = client.preparedQuery(sql)
-            .mapping(rowMapper::apply)
+        return client.preparedQuery(sql)
+            .mapping(rowMapper)
             .execute(tuple)
             .flatMap(rows -> {
                 List<Account> accounts = new ArrayList<>();
                 RowIterator<Account> iterator = rows.iterator();
-                iterator.forEachRemaining(row -> accounts.add(row));
+                iterator.forEachRemaining(accounts::add);
                 return Future.succeededFuture(new AccountList(accounts));
             });
-        return result;
     }
 
     @Override
@@ -115,7 +113,7 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
         // 3. run query
         return client.preparedQuery(sql)
             .execute(tuple)
-            .flatMap(rows -> Future.succeededFuture(rows.rowCount() != 0));
+            .map(rows ->rows.rowCount() != 0);
     }
 
     @Override
@@ -151,16 +149,25 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
         // Create a mapper
         AccountRowMapper mapper = new AccountRowMapper();
         // Execute query
-        Future<AccountList> result = client.preparedQuery(sql).mapping(mapper::apply).executeBatch(tuples)
-            .flatMap(rows -> {
+        return client.preparedQuery(sql).mapping(mapper).executeBatch(tuples)
+            .map(rows -> {
                 // 4. Assert results and map rows
                 List<Account> items = new ArrayList<>();
-                rows.iterator().forEachRemaining(row -> items.add(row));
-                return Future.succeededFuture(items);
+                rows.iterator().forEachRemaining(items::add);
+                return items;
             })
-            .flatMap(items -> Future.succeededFuture(new AccountList(items)));
-        
-        return result;
+            .map(AccountList::new);
+    }
+
+    @Override
+    public Future<PagedAccountList> findAndPaginate(Long userId, Integer page, Integer limit) {
+        return findAccounts(userId).map(AccountList::getAccounts).map(list -> {
+            int totalAccounts = list.size();
+            int start = (page - 1) * limit;
+            int numberOfPages =(totalAccounts / limit) + 1;
+            List<Account> accounts = list.stream().skip(start).limit(limit).collect(Collectors.toList());
+            return new PagedAccountList(accounts, numberOfPages, page, totalAccounts);
+        });
     }
 
 }

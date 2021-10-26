@@ -1,6 +1,7 @@
 package net.yurimednikov.vertxbook.cashx.repositories;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
@@ -50,7 +51,7 @@ class AccountReactivePgRepositoryImplTest {
         Account data = new Account(0, "My bank account", "EUR", 1);
         context.verify(() -> {
             Future<Account> result = repository.saveAccount(data);
-            result.onFailure(err -> context.failNow(err));
+            result.onFailure(context::failNow);
             result.onSuccess(account -> {
                 Assertions.assertNotEquals(0, account.getId());
                 context.completeNow();
@@ -78,7 +79,7 @@ class AccountReactivePgRepositoryImplTest {
                 Assertions.assertEquals(accounts.size(), result.getAccounts().size());
                 context.completeNow(); 
             })
-            .onFailure(err -> context.failNow(err));
+            .onFailure(context::failNow);
         });
     }
 
@@ -89,10 +90,10 @@ class AccountReactivePgRepositoryImplTest {
         Checkpoint retrievedCheckpoint = context.checkpoint();
         context.verify(() -> {
             repository.saveAccount(data)
-            .compose(saved -> {
+            .map(saved -> {
                 long id = saved.getId();
                 savedCheckpoint.flag();
-                return Future.succeededFuture(id);
+                return id;
             })
             .compose(id -> repository.findAccountById(id))
             .onSuccess(account -> {
@@ -100,7 +101,7 @@ class AccountReactivePgRepositoryImplTest {
                 Assertions.assertTrue(account.isPresent());
                 context.completeNow();
             })
-            .onFailure(err -> context.failNow(err));
+            .onFailure(context::failNow);
         });
         
     }
@@ -113,17 +114,17 @@ class AccountReactivePgRepositoryImplTest {
     Checkpoint deletedCheckpoint = context.checkpoint();
     context.verify(() -> {
         repository.saveAccount(data)
-        .compose(saved -> {
+        .map(saved -> {
             long id = saved.getId();
             Assertions.assertNotEquals(0, id);
             savedCheckpoint.flag();
-            return Future.succeededFuture(id);
+            return id;
         })
         .compose(id -> repository.findAccountById(id))
-        .compose(account -> {
+        .map(account -> {
             Assertions.assertTrue(account.isPresent());
             retrievedCheckpoint.flag();
-            return Future.succeededFuture(account.get().getId());
+            return account.get().getId();
         })
         .compose(id -> repository.removeAccount(id))
         .onSuccess(result -> {
@@ -131,7 +132,7 @@ class AccountReactivePgRepositoryImplTest {
             deletedCheckpoint.flag();
             context.completeNow();
         })
-        .onFailure(err -> context.failNow(err));
+        .onFailure(context::failNow);
     });
    } 
 
@@ -144,29 +145,28 @@ class AccountReactivePgRepositoryImplTest {
         Checkpoint deleteCheckpoint = context.checkpoint();
         context.verify(() -> {
             repository.saveAccount(initial)
-            .compose(saved -> {
+            .map(saved -> {
                 long id = saved.getId();
                 Assertions.assertNotEquals(0, id);
                 createCheckpoint.flag();
-                return Future.succeededFuture(saved);
+                return saved;
             })
-            .compose(account -> {
-                Account modified = new Account(account.getId(), "My wise account", "CHF", account.getUserId());
-                return Future.succeededFuture(modified);
+            .map(account -> {
+                return new Account(account.getId(), "My wise account", "CHF", account.getUserId());
             })
             .compose(account -> repository.updateAccount(account))
-            .compose(result -> {
+            .map(result -> {
                 updateCheckpoint.flag();
-                return Future.succeededFuture(result.getId());
+                return result.getId();
             })
             .compose(id -> repository.findAccountById(id))
-            .compose(retrieved -> {
+            .map(retrieved -> {
                 Assertions.assertTrue(retrieved.isPresent());
                 retrieveCheckpoint.flag();
                 Account account = retrieved.get();
                 Assertions.assertEquals("CHF", account.getCurrency());
                 Assertions.assertEquals("My wise account", account.getName());
-                return Future.succeededFuture(account.getId());
+                return account.getId();
             })
             .compose(id -> repository.removeAccount(id))
             .onSuccess(deleted -> {
@@ -174,7 +174,37 @@ class AccountReactivePgRepositoryImplTest {
                 deleteCheckpoint.flag();
                 context.completeNow();
             })
-            .onFailure(err -> context.failNow(err));
+            .onFailure(context::failNow);
+        });
+   }
+
+   @Test
+    void findAndPaginateTest(Vertx vertx, VertxTestContext context){
+        Checkpoint saveCheckpoint = context.checkpoint();
+
+        List<Account> accounts = new ArrayList<>();
+        long userId = 1;
+
+        for (int i = 0; i<51; i ++) {
+            Account account = new Account(0, "Account " + i, "EUR", userId);
+            accounts.add(account);
+        }
+
+        context.verify(() -> {
+            repository.saveManyAccounts(new AccountList(accounts))
+                    .compose(result -> {
+                        Assertions.assertEquals(51, result.getAccounts().size());
+                        saveCheckpoint.flag();
+                        return repository.findAndPaginate(userId, 4, 10);
+                    })
+                    .onFailure(context::failNow)
+                    .onSuccess(result -> {
+                        Assertions.assertEquals(51, result.getTotal());
+                        Assertions.assertEquals(4, result.getCurrentPage());
+                        Assertions.assertEquals(6, result.getNumberOfPages());
+                        Assertions.assertEquals(10, result.getAccounts().size());
+                        context.completeNow();
+                    });
         });
    }
 }

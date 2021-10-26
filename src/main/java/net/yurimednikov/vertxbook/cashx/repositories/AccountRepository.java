@@ -21,4 +21,6 @@ public interface AccountRepository {
 
     Future<AccountList> saveManyAccounts (AccountList accounts);
 
+    Future<PagedAccountList> findAndPaginate (Long userId, Integer page, Integer limit);
+
 }
