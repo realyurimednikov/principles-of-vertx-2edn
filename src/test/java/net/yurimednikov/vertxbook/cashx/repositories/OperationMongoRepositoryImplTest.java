@@ -71,7 +71,7 @@ class OperationMongoRepositoryImplTest {
                     Assertions.assertNotNull(result.id());
                     context.completeNow();
                 })
-                .onFailure(err -> context.failNow(err));
+                .onFailure(context::failNow);
         });
     }
 
@@ -87,13 +87,13 @@ class OperationMongoRepositoryImplTest {
         
         context.verify(() -> {
             repository.saveOperation(operation)
-                .compose(saved -> {
+                .map(saved -> {
                     Assertions.assertNotNull(saved.id());
                     saveCheckpoint.flag();
-                    return Future.succeededFuture(saved.id());
+                    return saved.id();
                 })
                 .compose(id -> repository.removeOperation(id))
-                .onFailure(err -> context.failNow(err))
+                .onFailure(context::failNow)
                 .onSuccess(deleted -> {
                     Assertions.assertTrue(deleted);
                     context.completeNow();
@@ -131,7 +131,7 @@ class OperationMongoRepositoryImplTest {
                 return Future.succeededFuture(retrieved.accountId());
             })
             .compose(id -> repository.removeOperation(id))
-            .onFailure(err -> context.failNow(err))
+            .onFailure(context::failNow)
             .onSuccess(deleted -> {
                 Assertions.assertTrue(deleted);
                 context.completeNow();

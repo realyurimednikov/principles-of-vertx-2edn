@@ -25,7 +25,7 @@ public class CategoryMongoRepositoryImpl implements CategoryRepository {
         document.put("name", category.name());
         document.put("userId", category.userId());
         document.put("type", category.type());
-        return client.save("categories", document).flatMap(id -> Future.succeededFuture(Category.withId(id, category)));
+        return client.save("categories", document).map(id -> Category.withId(id, category));
     }
 
     @Override
@@ -35,14 +35,14 @@ public class CategoryMongoRepositoryImpl implements CategoryRepository {
         query.put("_id", id);   
         // assert result
         Future<Optional<Category>> future = client.find("categories", query)
-            .flatMap(list -> Future.succeededFuture(list.stream().findFirst()))
-            .flatMap(result -> Future.succeededFuture(result.map(mapper::apply)));
+            .map(list -> list.stream().findFirst())
+            .map(result -> result.map(mapper));
 
         // alternative solution with findOne()
         // NULL fields arg means that all fields would be returned
         client.findOne("categories", query, null)
-            .flatMap(document -> Future.succeededFuture(Optional.ofNullable(document)))
-            .flatMap(result -> Future.succeededFuture(result.map(mapper::apply)));
+            .map(Optional::ofNullable)
+            .map(result -> result.map(mapper));
 
         // map document to object
         return future;
@@ -52,9 +52,8 @@ public class CategoryMongoRepositoryImpl implements CategoryRepository {
     public Future<Boolean> removeCategory(String id) {
         JsonObject query = new JsonObject();
         query.put("_id", id);  
-        Future<Boolean> future = client.removeDocument("categories", query)
-            .flatMap(result -> Future.succeededFuture(result.getRemovedCount() > 0));
-        return future;
+        return client.removeDocument("categories", query)
+            .map(result -> result.getRemovedCount() > 0);
     }
 
     @Override
@@ -64,10 +63,8 @@ public class CategoryMongoRepositoryImpl implements CategoryRepository {
         query.put("userId", userId);
         // execute query
        return client.find("categories", query)
-            .flatMap(list -> Future.succeededFuture(
-                list.stream().map(mapper::apply).collect(Collectors.toList())
-            ))
-            .flatMap(list -> Future.succeededFuture(new CategoryList(list)));
+            .map(list -> list.stream().map(mapper).collect(Collectors.toList()))
+            .map(CategoryList::new);
     }
 
     @Override

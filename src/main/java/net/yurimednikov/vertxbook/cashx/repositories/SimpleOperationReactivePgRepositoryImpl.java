@@ -75,18 +75,17 @@ public class SimpleOperationReactivePgRepositoryImpl implements SimpleOperationR
         Tuple params = Tuple.of(id);
         
 
-        Future<Optional<SimpleOperation>> future = client.preparedQuery(sql).execute(params).flatMap(rows -> {
+        Future<Optional<SimpleOperation>> future = client.preparedQuery(sql).execute(params).map(rows -> {
             if (rows.rowCount() == 0){
-                return Future.succeededFuture(Optional.empty());
+                return Optional.empty();
             }
 
             Row row = rows.iterator().next();
 
             Mapper.SimpleOperationMapper mapper = new Mapper.SimpleOperationMapper();
             SimpleOperation operation = mapper.toEntity(row);
-            Optional<SimpleOperation> result = Optional.of(operation);
 
-            return Future.succeededFuture(result);
+            return Optional.of(operation);
         });
         return future;
     }
@@ -120,22 +119,6 @@ public class SimpleOperationReactivePgRepositoryImpl implements SimpleOperationR
 
             for (Row row : rows) {
 
-                // long account_id = row.getLong("account_id");
-                // String name = row.getString("account_name");
-                // String account_currency = row.getString("account_currency");
-                // long account_userId = row.getLong("account_userid");
-                // Account account = new Account(account_id, name, account_currency, account_userId);
-
-                // long so_id = row.getLong("so_id");
-                // long so_userid = row.getLong("so_userid");
-                // String so_description = row.getString("so_description");
-                // String so_currency = row.getString("so_currency");
-                // String so_category = row.getString("so_category");
-                
-                // BigDecimal so_amount = row.getBigDecimal("so_amount");
-                // LocalDateTime so_datetime = row.getLocalDateTime("so_datetime");
-
-                // SimpleOperation operation = new SimpleOperation(so_id, so_userid, so_description, so_category, so_currency, so_amount, so_datetime, account);
                 SimpleOperation operation = mapper.toEntity(row);
                 operations.add(operation);
                 

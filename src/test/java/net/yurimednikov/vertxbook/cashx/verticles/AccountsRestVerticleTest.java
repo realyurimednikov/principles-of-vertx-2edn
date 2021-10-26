@@ -38,7 +38,6 @@ class AccountsRestVerticleTest {
 
     @BeforeEach
     void setup (Vertx vertx, VertxTestContext context){
-        // AccountController controller = new AccountController(service);
         AccountsRestVerticle verticle = new AccountsRestVerticle(controller);
         client = WebClient.create(vertx);
         vertx.deployVerticle(verticle, result -> {
@@ -58,12 +57,10 @@ class AccountsRestVerticleTest {
         Account accountResponse = Account.withId(100, account);
         Mockito.when(service.createAccount(Mockito.any(Account.class))).thenReturn(Future.succeededFuture(accountResponse));
         JsonObject payload = JsonObject.mapFrom(account);
-        // System.out.println(payload.encode());
         context.verify(() -> {
             client.postAbs("http://localhost:8080/api/accounts/1").sendJsonObject(payload)
                 .onFailure(context::failNow)
                 .onSuccess(result -> {
-                    // System.out.println(result.bodyAsString());
                     int responseCode = result.statusCode();
                     Assertions.assertEquals(201, responseCode);
                     JsonObject responseBody = result.bodyAsJsonObject();
@@ -78,11 +75,6 @@ class AccountsRestVerticleTest {
 
     @Test
     void createAccountValidationFailedEndpointTest(Vertx vertx, VertxTestContext context){
-        // Account account = new Account(0, "New account", "EUR", 1);
-        // Account accountResponse = Account.withId(100, account);
-        // Mockito.when(service.createAccount(Mockito.any(Account.class))).thenReturn(Future.succeededFuture(accountResponse));
-        // JsonObject payload = JsonObject.mapFrom(account);
-        // System.out.println(payload.encode());
         JsonObject payload = new JsonObject();
         payload.put("name", "Account name");
         payload.put("userId", 1);

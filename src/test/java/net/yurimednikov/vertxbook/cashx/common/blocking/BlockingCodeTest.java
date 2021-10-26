@@ -16,8 +16,10 @@ class BlockingCodeTest {
     void runningBlockingCodeTest(Vertx vertx, VertxTestContext context){
         context.verify(() -> {
             vertx.executeBlocking(promise -> {
-                Unirest.get("https://jsonplaceholder.typicode.com/posts").accept("application/json").asString()
-                    .ifSuccess(result -> promise.complete(result))
+                Unirest.get("https://jsonplaceholder.typicode.com/posts")
+                        .accept("application/json")
+                        .asString()
+                    .ifSuccess(promise::complete)
                     .ifFailure(response -> promise.fail(new RuntimeException()));
             })
             .onFailure(context::failNow)

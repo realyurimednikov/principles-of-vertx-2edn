@@ -74,12 +74,12 @@ public class AccountsRestVerticle extends AbstractVerticle {
                     return Future.failedFuture(ex);
                 }
             })
-            .compose(module -> {
+            .map(module -> {
                 Injector injector = Guice.createInjector(module);
                 AccountsRestVerticle verticle = injector.getInstance(AccountsRestVerticle.class);
-                return Future.succeededFuture(verticle);
+                return verticle;
             })
-            .compose(verticle -> vertx.deployVerticle(verticle))
+            .compose(vertx::deployVerticle)
             .onFailure(err -> {
                 System.out.println(err.getMessage());
                 vertx.close();

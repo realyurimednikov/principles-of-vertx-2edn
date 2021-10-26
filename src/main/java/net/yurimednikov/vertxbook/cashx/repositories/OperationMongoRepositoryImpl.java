@@ -28,7 +28,7 @@ public record OperationMongoRepositoryImpl(MongoClient client) implements Operat
         document.put("dateTime", operation.dateTime().toString());
         document.put("accountId", operation.accountId());
         return client.insert("operations", document)
-            .flatMap(id -> Future.succeededFuture(Operation.withId(id, operation)));
+            .map(id -> Operation.withId(id, operation));
     }
 
     @Override
@@ -43,29 +43,23 @@ public record OperationMongoRepositoryImpl(MongoClient client) implements Operat
                 .put("foreignField", "_id")
                 .put("as", "category"))
         );
-        // aggregatePipeline.add(new JsonObject().put("cursor", new JsonObject().put("batchSize", 0)));
 
         JsonObject aggregateCommand = new JsonObject();
         aggregateCommand.put("aggregate", "operations");
         aggregateCommand.put("pipeline", aggregatePipeline);
         aggregateCommand.put("cursor", new JsonObject());
-        // JsonObject query = new JsonObject();
-        // query.put("_id", id);
-        // return client.findOne("operations", query, null)
-        //     .flatMap(document -> Future.succeededFuture(Optional.ofNullable(document)))
-        //     .flatMap(result -> Future.succeededFuture(result.map(mapper::apply)));
+
         return client.runCommand("aggregate", aggregateCommand)
-            .flatMap(result -> {
+            .map(result -> {
                 System.out.println(result.getJsonObject("cursor").getJsonArray("firstBatch"));
                 JsonArray results = result.getJsonObject("cursor").getJsonArray("firstBatch");
                 System.out.println(results);
                 JsonObject data = results.getJsonObject(0);
                 System.out.println(data);
-                return Future.succeededFuture(data);
+                return data;
             })
-            .flatMap(document -> Future.succeededFuture(Optional.ofNullable(document)))
-            .flatMap(result -> Future.succeededFuture(result.map(mapper::apply)));
-        // return null;
+            .map(Optional::ofNullable)
+            .map(result -> result.map(mapper));
     }
 
     @Override
@@ -79,7 +73,6 @@ public record OperationMongoRepositoryImpl(MongoClient client) implements Operat
 
     @Override
     public Future<OperationList> findOperations(String userId) {
-        // todo with aggregation
         return null;
     }
     

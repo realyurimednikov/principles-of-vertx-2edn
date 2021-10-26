@@ -162,10 +162,10 @@ class AccountReactivePgRepositoryImplTest {
             .compose(id -> repository.findAccountById(id))
             .map(retrieved -> {
                 Assertions.assertTrue(retrieved.isPresent());
-                retrieveCheckpoint.flag();
                 Account account = retrieved.get();
                 Assertions.assertEquals("CHF", account.getCurrency());
                 Assertions.assertEquals("My wise account", account.getName());
+                retrieveCheckpoint.flag();
                 return account.getId();
             })
             .compose(id -> repository.removeAccount(id))
