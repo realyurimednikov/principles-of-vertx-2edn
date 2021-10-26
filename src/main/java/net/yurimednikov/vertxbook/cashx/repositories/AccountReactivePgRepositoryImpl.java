@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import io.vertx.core.Future;
 import io.vertx.sqlclient.Row;
@@ -94,12 +95,14 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
         return client.preparedQuery(sql)
             .mapping(rowMapper)
             .execute(tuple)
-            .flatMap(rows -> {
-                List<Account> accounts = new ArrayList<>();
-                RowIterator<Account> iterator = rows.iterator();
-                iterator.forEachRemaining(accounts::add);
-                return Future.succeededFuture(new AccountList(accounts));
-            });
+//            .flatMap(rows -> {
+//                List<Account> accounts = new ArrayList<>();
+//                RowIterator<Account> iterator = rows.iterator();
+//                iterator.forEachRemaining(accounts::add);
+//                return Future.succeededFuture(new AccountList(accounts));
+//            });
+            .map(rows -> StreamSupport.stream(rows.spliterator(), false).collect(Collectors.toList()))
+                .map(AccountList::new);
     }
 
     @Override

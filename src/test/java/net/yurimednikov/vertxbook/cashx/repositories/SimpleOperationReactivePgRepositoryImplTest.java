@@ -21,6 +21,7 @@ import io.vertx.sqlclient.SqlClient;
 import net.yurimednikov.vertxbook.cashx.models.SimpleOperation;
 
 @ExtendWith(VertxExtension.class)
+@Disabled
 class SimpleOperationReactivePgRepositoryImplTest {
 
     SimpleOperationReactivePgRepositoryImpl repository;

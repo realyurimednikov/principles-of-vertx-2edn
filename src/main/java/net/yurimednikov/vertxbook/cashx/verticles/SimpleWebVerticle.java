@@ -15,19 +15,19 @@ class SimpleWebVerticle extends AbstractVerticle {
         router.get("/hello") //3
                 .handler(context -> {
                     String message = """
-                            <h1>Hello from the Vertx</h1>
-                            <p>This is just a simple example, that shows how to build a
-                             web application with Vertx</p>
+                            <h1>Hello from Vertx 4!</h1>
+                            <h2>This is just a simple example, that shows how to build a
+                             web application with Vertx</h2>
                             <p> :) </p>
                             """; //4
                     context.response()
-                            .putHeader("Content-Type", "text/html")
-                            .setStatusCode(200) //5
-                            .end(message); //6
+                            .putHeader("Content-Type", "text/html") //5
+                            .setStatusCode(200) //6
+                            .end(message); //7
                 });
 
-        server.requestHandler(router); //7
-        server.listen(8080) //8
+        server.requestHandler(router); //8
+        server.listen(8080) //9
                 .onFailure(promise::fail)
                 .onSuccess(result -> promise.complete());
     }
