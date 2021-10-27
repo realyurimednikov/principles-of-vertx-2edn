@@ -28,16 +28,6 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
     }
 
     public Future<Void> createTable(){
-//        String createTableQuery = """
-//                CREATE TABLE "accounts" (
-//                account_id serial PRIMARY KEY,
-//                account_name varchar(200) NOT NULL,
-//                account_currency varchar(3) NOT NULL,
-//                account_userid INTEGER
-//                );
-//                """;
-//
-//        return client.query(createTableQuery).execute().compose(r -> Future.succeededFuture());
         return vertx.fileSystem().readFile("sql/accounts.sql")
                 .map(Buffer::toString)
                 .compose(query -> client.query(query).execute())
