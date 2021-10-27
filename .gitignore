@@ -26,3 +26,4 @@
 .classpath
 .project
 .settings/
+target/

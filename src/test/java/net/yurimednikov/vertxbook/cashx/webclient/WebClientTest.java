@@ -1,5 +1,6 @@
 package net.yurimednikov.vertxbook.cashx.webclient;
 
+import io.vertx.ext.web.client.predicate.ResponsePredicate;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class WebClientTest {
     }
     
     @Test
-    void requestWithoutBody(Vertx vertx, VertxTestContext context){
+    void requestWithoutBodyTest(Vertx vertx, VertxTestContext context){
         context.verify(() -> {
             String url = "https://jsonplaceholder.typicode.com/posts";
 
@@ -43,7 +44,7 @@ class WebClientTest {
     }
 
     @Test
-    void requestWithBody(Vertx vertx, VertxTestContext context){
+    void requestWithBodyTest(Vertx vertx, VertxTestContext context){
         JsonObject payload = new JsonObject();
         payload.put("userId", 1);
         payload.put("title", "Title");
@@ -62,6 +63,24 @@ class WebClientTest {
                     Assertions.assertEquals(201, statusCode);
                     context.completeNow();
                 });
+        });
+    }
+
+    @Test
+    void requestWithQueryParamsTest(Vertx vertx, VertxTestContext context){
+        context.verify(() -> {
+            String url = "https://jsonplaceholder.typicode.com/comments";
+            client.getAbs(url)
+                    .addQueryParam("postId", "1")
+                    .expect(ResponsePredicate.SC_OK)
+                    .as(BodyCodec.jsonArray()).send()
+                    .onFailure(context::failNow)
+                    .onSuccess(result -> {
+                        JsonArray body = result.body();
+                        int length = body.size();
+                        Assertions.assertEquals(5, length);
+                        context.completeNow();
+                    });
         });
     }
 }
