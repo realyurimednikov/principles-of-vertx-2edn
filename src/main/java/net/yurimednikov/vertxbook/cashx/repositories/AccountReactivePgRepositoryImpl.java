@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.SqlClient;
@@ -18,22 +20,28 @@ import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
 public class AccountReactivePgRepositoryImpl implements AccountRepository{
 
     private final SqlClient client;
+    private final Vertx vertx;
 
-    public AccountReactivePgRepositoryImpl(SqlClient client){
+    public AccountReactivePgRepositoryImpl(Vertx vertx, SqlClient client){
         this.client = client;
+        this.vertx = vertx;
     }
 
     public Future<Void> createTable(){
-        String createTableQuery = """
-                CREATE TABLE "accounts" (
-                account_id serial PRIMARY KEY,
-                account_name varchar(200) NOT NULL,
-                account_currency varchar(3) NOT NULL,
-                account_userid INTEGER
-                );
-                """;
-
-        return client.query(createTableQuery).execute().compose(r -> Future.succeededFuture());
+//        String createTableQuery = """
+//                CREATE TABLE "accounts" (
+//                account_id serial PRIMARY KEY,
+//                account_name varchar(200) NOT NULL,
+//                account_currency varchar(3) NOT NULL,
+//                account_userid INTEGER
+//                );
+//                """;
+//
+//        return client.query(createTableQuery).execute().compose(r -> Future.succeededFuture());
+        return vertx.fileSystem().readFile("sql/accounts.sql")
+                .map(Buffer::toString)
+                .compose(query -> client.query(query).execute())
+                .compose(result -> Future.succeededFuture());
     }
 
     @Override
@@ -95,12 +103,6 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
         return client.preparedQuery(sql)
             .mapping(rowMapper)
             .execute(tuple)
-//            .flatMap(rows -> {
-//                List<Account> accounts = new ArrayList<>();
-//                RowIterator<Account> iterator = rows.iterator();
-//                iterator.forEachRemaining(accounts::add);
-//                return Future.succeededFuture(new AccountList(accounts));
-//            });
             .map(rows -> StreamSupport.stream(rows.spliterator(), false).collect(Collectors.toList()))
                 .map(AccountList::new);
     }

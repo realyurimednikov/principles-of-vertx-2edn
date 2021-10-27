@@ -30,7 +30,7 @@ class PaymentCategoryReactivePgRepositoryImplTest {
         int port = container.getFirstMappedPort();
         String uri = "postgresql://user:secret@localhost:" + port + "/cashxdb";
         SqlClient client = PgPool.client(vertx, uri);
-        repository = new PaymentCategoryReactivePgRepositoryImpl(client);
+        repository = new PaymentCategoryReactivePgRepositoryImpl(vertx, client);
         repository.createTable().onSuccess(r -> context.completeNow()).onFailure(context::failNow);
     }
 

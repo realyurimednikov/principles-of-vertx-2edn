@@ -37,7 +37,7 @@ class AccountReactivePgRepositoryImplTest {
          int port = container.getFirstMappedPort();
          String uri = "postgresql://user:secret@localhost:" + port + "/cashxdb";
          SqlClient client = PgPool.client(vertx, uri);
-         repository = new AccountReactivePgRepositoryImpl(client);
+         repository = new AccountReactivePgRepositoryImpl(vertx, client);
          repository.createTable().onSuccess(r -> context.completeNow()).onFailure(context::failNow);
     }
 

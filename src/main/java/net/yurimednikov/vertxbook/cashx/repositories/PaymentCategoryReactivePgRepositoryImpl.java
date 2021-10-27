@@ -1,6 +1,8 @@
 package net.yurimednikov.vertxbook.cashx.repositories;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
@@ -15,23 +17,29 @@ public class PaymentCategoryReactivePgRepositoryImpl implements  PaymentCategory
 
     private final SqlClient client;
     private final PaymentCategoryRowMapper mapper;
+    private final Vertx vertx;
 
-    public PaymentCategoryReactivePgRepositoryImpl(SqlClient client) {
+    public PaymentCategoryReactivePgRepositoryImpl(Vertx vertx, SqlClient client) {
         this.client = client;
         this.mapper = new PaymentCategoryRowMapper();
+        this.vertx = vertx;
     }
 
     public Future<Void> createTable(){
-        String createTableQuery = """
-                CREATE TABLE "payment_categories" (
-                category_id serial PRIMARY KEY,
-                 category_name varchar(200) NOT NULL,
-                 category_type varchar(3) NOT NULL,
-                 category_userid INTEGER
-                 );
-                """;
-
-        return client.query(createTableQuery).execute().compose(r -> Future.succeededFuture());
+//        String createTableQuery = """
+//                CREATE TABLE "payment_categories" (
+//                category_id serial PRIMARY KEY,
+//                 category_name varchar(200) NOT NULL,
+//                 category_type varchar(3) NOT NULL,
+//                 category_userid INTEGER
+//                 );
+//                """;
+//
+//        return client.query(createTableQuery).execute().compose(r -> Future.succeededFuture());
+        return vertx.fileSystem().readFile("sql/payment_categories.sql")
+                .map(Buffer::toString)
+                .compose(query -> client.query(query).execute())
+                .compose(result -> Future.succeededFuture());
     }
 
     @Override

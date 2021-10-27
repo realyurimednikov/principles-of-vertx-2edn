@@ -22,7 +22,7 @@ public class ApplicationModule extends AbstractModule {
 
     public ApplicationModule(Vertx vertx, ApplicationConfiguration configuration) throws DependencyCreationException{
         SqlClient client = PgPool.client(vertx, configuration.getDatabaseUrl());
-        this.repository = new AccountReactivePgRepositoryImpl(client);
+        this.repository = new AccountReactivePgRepositoryImpl(vertx, client);
         this.service = new AccountServiceImpl(repository);
         this.controller = new AccountController(service);
     }

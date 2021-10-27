@@ -67,8 +67,8 @@ class PaymentOperationReactivePgRepositoryImplTest {
         Account account = new Account(1, "My bank account", "EUR", 1);
         PaymentCategory category = new PaymentCategory(1, 1, "Software development", "inc");
 
-        PaymentCategoryReactivePgRepositoryImpl categoryRepository = new PaymentCategoryReactivePgRepositoryImpl(client);
-        AccountReactivePgRepositoryImpl accountRepository = new AccountReactivePgRepositoryImpl(client);
+        PaymentCategoryReactivePgRepositoryImpl categoryRepository = new PaymentCategoryReactivePgRepositoryImpl(vertx, client);
+        AccountReactivePgRepositoryImpl accountRepository = new AccountReactivePgRepositoryImpl(vertx, client);
 
         Future<Account> createAccountFuture = accountRepository.createTable()
                 .compose(r -> accountRepository.saveAccount(account));
