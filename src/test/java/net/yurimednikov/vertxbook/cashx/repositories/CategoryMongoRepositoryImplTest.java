@@ -1,5 +1,6 @@
 package net.yurimednikov.vertxbook.cashx.repositories;
 
+import net.yurimednikov.vertxbook.cashx.models.CategoryList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -18,6 +19,9 @@ import org.testcontainers.containers.MongoDBContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ExtendWith(VertxExtension.class)
 @Testcontainers
@@ -161,6 +165,31 @@ class CategoryMongoRepositoryImplTest {
                 context.completeNow();
             })
             .onFailure(context::failNow);
+        });
+    }
+
+    @Test
+    void saveManyCategoriesTest(Vertx vertx, VertxTestContext context){
+        Checkpoint saveCheckpoint = context.checkpoint();
+        List<Category> categories = new ArrayList<>();
+        String userId = "user";
+        for (int i=0; i<50; i++){
+            Category category = new Category(null, userId, "Salary", "income");
+            categories.add(category);
+        }
+        CategoryList categoryList = new CategoryList(categories);
+        context.verify(() -> {
+            repository.saveManyCategories(categoryList)
+                    .map(result -> {
+                        Assertions.assertTrue(result);
+                        saveCheckpoint.flag();
+                        return result;
+                    }).compose(r -> repository.findCategories(userId))
+                    .onFailure(context::failNow)
+                    .onSuccess(result -> {
+                        Assertions.assertEquals(50, result.categories().size());
+                        context.completeNow();
+                    });
         });
     }
 }

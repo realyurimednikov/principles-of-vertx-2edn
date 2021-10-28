@@ -1,10 +1,12 @@
 package net.yurimednikov.vertxbook.cashx.repositories;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.BulkOperation;
 import io.vertx.ext.mongo.MongoClient;
 import net.yurimednikov.vertxbook.cashx.models.Category;
 import net.yurimednikov.vertxbook.cashx.models.CategoryList;
@@ -71,5 +73,22 @@ public class CategoryMongoRepositoryImpl implements CategoryRepository {
     public Future<Category> updateCategory(Category category) {
         return category.id() != null ? saveCategory(category) : Future.failedFuture(new RuntimeException());
     }
-    
+
+    @Override
+    public Future<Boolean> saveManyCategories(CategoryList categoryList) {
+        List<BulkOperation> bulkOperations = categoryList.categories().stream()
+                .map(c -> { //1
+                    JsonObject document = new JsonObject();
+                    document.put("name", c.name());
+                    document.put("userId", c.userId());
+                    document.put("type", c.type());
+                    return document;
+                })
+                .map(BulkOperation::createInsert) //2
+                .collect(Collectors.toList());;
+        return client.bulkWrite("categories", bulkOperations) //3
+                .map(result -> result.getInsertedCount() == categoryList.categories().size()); //4
+    }
+
+
 }

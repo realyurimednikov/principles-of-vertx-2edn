@@ -17,4 +17,6 @@ public interface CategoryRepository {
     Future<CategoryList> findCategories (String userId);
 
     Future<Category> updateCategory (Category category);
+
+    Future<Boolean> saveManyCategories(CategoryList categoryList);
 }
