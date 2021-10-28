@@ -3,8 +3,12 @@ package net.yurimednikov.vertxbook.cashx.web;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import net.yurimednikov.vertxbook.cashx.models.Account;
+import net.yurimednikov.vertxbook.cashx.models.AccountList;
+import net.yurimednikov.vertxbook.cashx.models.Pagination;
 import net.yurimednikov.vertxbook.cashx.services.AccountService;
 import net.yurimednikov.vertxbook.cashx.validators.AccountValidator;
+
+import java.util.Optional;
 
 public class AccountController {
     
@@ -69,14 +73,54 @@ public class AccountController {
             });
     }
 
+    // without a pagination
+//    public void findAccounts (RoutingContext context){
+//        String idParam = context.pathParam("userId");
+//        long userId = Long.valueOf(idParam);
+//        service.findAccounts(userId)
+//            .onFailure(context::fail)
+//            .onSuccess(accounts -> {
+//                JsonObject responseBody = JsonObject.mapFrom(accounts);
+//                context.response().setStatusCode(200).end(responseBody.encode());
+//            });
+//    }
+
+    // with a pagination
     public void findAccounts (RoutingContext context){
         String idParam = context.pathParam("userId");
-        long userId = Long.valueOf(idParam);
-        service.findAccounts(userId)
+        Long userId = Long.valueOf(idParam);
+        Optional<Integer> page = context.queryParam("page").stream().map(Integer::valueOf).findFirst();
+        Optional<Integer> limit = context.queryParam("limit").stream().map(Integer::valueOf).findFirst();
+        if (page.isPresent() && limit.isPresent()) {
+            // continue with a pagination
+            Pagination pagination = new Pagination(page.get(), limit.get());
+            service.findAccountsWithPagination(userId, pagination)
+                    .onFailure(context::fail)
+                    .onSuccess(pagedAccountList -> {
+                        AccountList accounts = new AccountList(pagedAccountList.getAccounts());
+                        JsonObject responseBody = JsonObject.mapFrom(accounts);
+                        context.response()
+                                .setStatusCode(200)
+                                .putHeader("X-APP-PAGINATION", "true")
+                                .putHeader("X-APP-PAGINATION-TOTAL-PAGES",
+                                        Integer.toString(pagedAccountList.getNumberOfPages()))
+                                .putHeader("X-APP-PAGINATION-TOTAL-ENTITIES",
+                                        Integer.toString(pagedAccountList.getTotal()))
+                                .putHeader("X-APP-PAGINATION-CURRENT-PAGE",
+                                        Integer.toString(pagedAccountList.getCurrentPage()))
+                                .end(responseBody.encode());
+                    });
+        } else {
+            // continue without a pagination
+            service.findAccounts(userId)
             .onFailure(context::fail)
             .onSuccess(accounts -> {
                 JsonObject responseBody = JsonObject.mapFrom(accounts);
-                context.response().setStatusCode(200).end(responseBody.encode());
+                context.response()
+                        .setStatusCode(200)
+                        .putHeader("X-APP-PAGINATION", "false")
+                        .end(responseBody.encode());
             });
+        }
     }
 }

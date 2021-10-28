@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import io.vertx.ext.web.client.predicate.ResponsePredicate;
+import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
+import net.yurimednikov.vertxbook.cashx.models.Pagination;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -147,11 +149,13 @@ class AccountsRestVerticleTest {
         Mockito.when(service.findAccounts(1)).thenReturn(Future.succeededFuture(accountList));
         context.verify(() -> {
             client.getAbs("http://localhost:8080/api/accounts/1")
+                    .expect(ResponsePredicate.SC_OK)
                 .send()
                 .onFailure(context::failNow)
                 .onSuccess(result -> {
-                    int responseCode = result.statusCode();
-                    Assertions.assertEquals(200, responseCode);
+                    String paginationHeader = result.getHeader("X-APP-PAGINATION");
+                    Assertions.assertNotNull(paginationHeader);
+                    Assertions.assertEquals("false", paginationHeader);
                     JsonObject responseBody = result.bodyAsJsonObject();
                     Assertions.assertNotNull(responseBody);
                     JsonArray bodyAccounts = responseBody.getJsonArray("accounts");
@@ -159,6 +163,53 @@ class AccountsRestVerticleTest {
                     Assertions.assertEquals(5, bodyAccounts.size());
                     context.completeNow();
                 });
+        });
+    }
+
+    @Test
+    void getAccountsForUserPaginatedEndpointTest(Vertx vertx, VertxTestContext context){
+        List<Account> accounts = List.of(
+                new Account(1234, "New account", "EUR", 1),
+                new Account(3456, "New account", "EUR", 1),
+                new Account(7890, "New account", "EUR", 1),
+                new Account(1020, "New account", "EUR", 1),
+                new Account(3040, "New account", "EUR", 1)
+        );
+        int page = 3;
+        int limit = 5;
+
+        PagedAccountList data = new PagedAccountList(accounts, 20, page, 100);
+        Mockito.when(service.findAccountsWithPagination(1, new Pagination(page, limit)))
+                .thenReturn(Future.succeededFuture(data));
+
+        context.verify(() -> {
+            client.getAbs("http://localhost:8080/api/accounts/1")
+                    .expect(ResponsePredicate.SC_OK)
+                    .addQueryParam("page", Integer.toString(page))
+                    .addQueryParam("limit", Integer.toString(limit))
+                    .send()
+                    .onFailure(context::failNow)
+                    .onSuccess(result -> {
+                        String paginationHeader = result.getHeader("X-APP-PAGINATION");
+                        Assertions.assertEquals("true", paginationHeader);
+
+                        String totalPagesHeader = result.getHeader("X-APP-PAGINATION-TOTAL-PAGES");
+                        Assertions.assertNotNull(totalPagesHeader);
+                        Assertions.assertEquals("20", totalPagesHeader);
+
+                        String totalEntitiesHeader = result.getHeader("X-APP-PAGINATION-TOTAL-ENTITIES");
+                        Assertions.assertNotNull(totalEntitiesHeader);
+                        Assertions.assertEquals("100", totalEntitiesHeader);
+
+
+                        JsonObject responseBody = result.bodyAsJsonObject();
+                        Assertions.assertNotNull(responseBody);
+                        JsonArray bodyAccounts = responseBody.getJsonArray("accounts");
+                        Assertions.assertNotNull(bodyAccounts);
+                        Assertions.assertEquals(5, bodyAccounts.size());
+
+                        context.completeNow();
+                    });
         });
     }
 

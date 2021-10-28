@@ -5,6 +5,8 @@ import java.util.Optional;
 import io.vertx.core.Future;
 import net.yurimednikov.vertxbook.cashx.models.Account;
 import net.yurimednikov.vertxbook.cashx.models.AccountList;
+import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
+import net.yurimednikov.vertxbook.cashx.models.Pagination;
 import net.yurimednikov.vertxbook.cashx.repositories.AccountRepository;
 
 public class AccountServiceImpl implements AccountService{
@@ -38,5 +40,10 @@ public class AccountServiceImpl implements AccountService{
     @Override
     public Future<Boolean> removeAccount(long id) {
         return repository.removeAccount(id);
+    }
+
+    @Override
+    public Future<PagedAccountList> findAccountsWithPagination(long userId, Pagination pagination) {
+        return repository.findAndPaginate(userId, pagination.getPage(), pagination.getLimit());
     }
 }
