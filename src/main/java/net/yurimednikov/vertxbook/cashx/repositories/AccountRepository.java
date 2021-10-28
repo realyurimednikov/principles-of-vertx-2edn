@@ -6,6 +6,7 @@ import io.vertx.core.Future;
 import net.yurimednikov.vertxbook.cashx.models.Account;
 import net.yurimednikov.vertxbook.cashx.models.AccountList;
 import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
+import net.yurimednikov.vertxbook.cashx.models.Pagination;
 
 public interface AccountRepository {
     
@@ -21,6 +22,6 @@ public interface AccountRepository {
 
     Future<AccountList> saveManyAccounts (AccountList accounts);
 
-    Future<PagedAccountList> findAndPaginate (Long userId, Integer page, Integer limit);
+    Future<PagedAccountList> findAndPaginate (Long userId, Pagination pagination);
 
 }

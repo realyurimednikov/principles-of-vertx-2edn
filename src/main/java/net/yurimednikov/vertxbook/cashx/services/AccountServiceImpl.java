@@ -44,6 +44,6 @@ public class AccountServiceImpl implements AccountService{
 
     @Override
     public Future<PagedAccountList> findAccountsWithPagination(long userId, Pagination pagination) {
-        return repository.findAndPaginate(userId, pagination.getPage(), pagination.getLimit());
+        return repository.findAndPaginate(userId, pagination);
     }
 }

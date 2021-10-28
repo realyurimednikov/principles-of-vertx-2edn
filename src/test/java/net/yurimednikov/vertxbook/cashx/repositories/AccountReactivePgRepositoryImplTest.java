@@ -4,6 +4,7 @@ package net.yurimednikov.vertxbook.cashx.repositories;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.yurimednikov.vertxbook.cashx.models.Pagination;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -190,12 +191,14 @@ class AccountReactivePgRepositoryImplTest {
             accounts.add(account);
         }
 
+        Pagination pagination = new Pagination(4, 10);
+
         context.verify(() -> {
             repository.saveManyAccounts(new AccountList(accounts))
                     .compose(result -> {
                         Assertions.assertEquals(51, result.getAccounts().size());
                         saveCheckpoint.flag();
-                        return repository.findAndPaginate(userId, 4, 10);
+                        return repository.findAndPaginate(userId, pagination);
                     })
                     .onFailure(context::failNow)
                     .onSuccess(result -> {

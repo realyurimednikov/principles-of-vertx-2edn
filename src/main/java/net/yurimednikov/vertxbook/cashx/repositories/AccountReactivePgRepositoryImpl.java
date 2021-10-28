@@ -16,6 +16,7 @@ import io.vertx.sqlclient.Tuple;
 import net.yurimednikov.vertxbook.cashx.models.Account;
 import net.yurimednikov.vertxbook.cashx.models.AccountList;
 import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
+import net.yurimednikov.vertxbook.cashx.models.Pagination;
 
 public class AccountReactivePgRepositoryImpl implements AccountRepository{
 
@@ -155,13 +156,13 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
     }
 
     @Override
-    public Future<PagedAccountList> findAndPaginate(Long userId, Integer page, Integer limit) {
+    public Future<PagedAccountList> findAndPaginate(Long userId, Pagination pagination) {
         return findAccounts(userId).map(AccountList::getAccounts).map(list -> {
             int totalAccounts = list.size();
-            int start = (page - 1) * limit;
-            int numberOfPages =(totalAccounts / limit) + 1;
-            List<Account> accounts = list.stream().skip(start).limit(limit).collect(Collectors.toList());
-            return new PagedAccountList(accounts, numberOfPages, page, totalAccounts);
+            int start = (pagination.getPage() - 1) * pagination.getLimit();
+            int numberOfPages =(totalAccounts / pagination.getLimit()) + 1;
+            List<Account> accounts = list.stream().skip(start).limit(pagination.getLimit()).collect(Collectors.toList());
+            return new PagedAccountList(accounts, numberOfPages, pagination.getPage(), totalAccounts);
         });
     }
 
