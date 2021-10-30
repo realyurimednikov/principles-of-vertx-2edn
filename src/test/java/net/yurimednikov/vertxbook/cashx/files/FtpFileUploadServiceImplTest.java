@@ -42,8 +42,6 @@ class FtpFileUploadServiceImplTest {
 
     @Test
     void uploadTest(Vertx vertx, VertxTestContext context){
-        // Checkpoint uploadCheckpoint = context.checkpoint();
-        // Checkpoint existCheckpoint = context.checkpoint();
 
         String filename = UUID.randomUUID().toString();
         String format = "txt";
