@@ -15,8 +15,9 @@ import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import net.yurimednikov.vertxbook.cashx.config.ApplicationConfigurationManager;
 import net.yurimednikov.vertxbook.cashx.config.BasicApplicationConfigurationManagerImpl;
+import net.yurimednikov.vertxbook.cashx.config.EmbeddedApplicationConfigurationManagerImpl;
+import net.yurimednikov.vertxbook.cashx.errors.AccessDeniedException;
 import net.yurimednikov.vertxbook.cashx.errors.DependencyCreationException;
-import net.yurimednikov.vertxbook.cashx.errors.EntityAlreadyExistsException;
 import net.yurimednikov.vertxbook.cashx.errors.ValidatorException;
 import net.yurimednikov.vertxbook.cashx.modules.ApplicationModule;
 import net.yurimednikov.vertxbook.cashx.web.AccountController;
@@ -49,7 +50,7 @@ public class AccountsRestVerticle extends AbstractVerticle {
                     JsonArray validatorMessages = exception.getMessages();
                     System.out.println(validatorMessages.encode());
                     context.response().setStatusCode(400).end(validatorMessages.encode());
-                } else if (reason instanceof EntityAlreadyExistsException) {
+                } else if (reason instanceof AccessDeniedException) {
                     context.response().setStatusCode(403).end();
                 } else {
                     context.response().setStatusCode(500).end("Error happened");
@@ -64,7 +65,8 @@ public class AccountsRestVerticle extends AbstractVerticle {
 
     public static void main(String[] args) {
         Vertx vertx = Vertx.vertx();
-        ApplicationConfigurationManager configurationManager = new BasicApplicationConfigurationManagerImpl(vertx);
+//        ApplicationConfigurationManager configurationManager = new BasicApplicationConfigurationManagerImpl(vertx);
+        ApplicationConfigurationManager configurationManager = new EmbeddedApplicationConfigurationManagerImpl(vertx);
         configurationManager.retrieveApplicationConfiguration()
             .compose(configuration -> {
                 try {

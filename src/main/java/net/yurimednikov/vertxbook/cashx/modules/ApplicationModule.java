@@ -16,13 +16,16 @@ import net.yurimednikov.vertxbook.cashx.web.AccountController;
 
 public class ApplicationModule extends AbstractModule {
 
-    private final AccountRepository repository;
+    private final AccountReactivePgRepositoryImpl repository;
     private final AccountService service;
     private final AccountController controller;
 
     public ApplicationModule(Vertx vertx, ApplicationConfiguration configuration) throws DependencyCreationException{
         SqlClient client = PgPool.client(vertx, configuration.getDatabaseUrl());
         this.repository = new AccountReactivePgRepositoryImpl(vertx, client);
+        this.repository.createTable()
+                .onFailure(System.out::println)
+                .onSuccess(r -> System.out.println("Account Repository: A table created"));
         this.service = new AccountServiceImpl(repository);
         this.controller = new AccountController(service);
     }
