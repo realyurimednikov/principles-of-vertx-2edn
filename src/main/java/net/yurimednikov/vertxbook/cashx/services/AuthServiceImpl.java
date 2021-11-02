@@ -1,6 +1,9 @@
 package net.yurimednikov.vertxbook.cashx.services;
 
 import io.vertx.core.Future;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 import net.yurimednikov.vertxbook.cashx.errors.AccessDeniedException;
 import net.yurimednikov.vertxbook.cashx.models.User;
 import net.yurimednikov.vertxbook.cashx.repositories.UserRepository;
@@ -8,7 +11,6 @@ import net.yurimednikov.vertxbook.cashx.tokens.TokenManager;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class AuthServiceImpl implements AuthService{
@@ -47,6 +49,26 @@ public class AuthServiceImpl implements AuthService{
                return Future.failedFuture(new AccessDeniedException());
            }
         });
+    }
+
+    @Override
+    public void authenticate(RoutingContext context) {
+       try {
+           String token = context.request().getHeader("Authorization");
+           if (token == null || token.isEmpty()) throw new AccessDeniedException();
+           tokenManager.decodeToken(token).onFailure(context::fail).onSuccess(principal -> {
+               JsonObject user = new JsonObject();
+               user.put("userId", principal.getUserid());
+               System.out.println("userId" + user.encode());
+               JsonArray permissions = new JsonArray(principal.getPermissions());
+               user.put("permissions", permissions);
+               System.out.println("User: " + user.encode());
+               context.setUser(io.vertx.ext.auth.User.create(user));
+               context.next();
+           });
+       } catch (Exception ex){
+           context.fail(ex);
+       }
     }
 
 
