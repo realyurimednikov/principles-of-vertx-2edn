@@ -34,7 +34,7 @@ public class SecuredApplicationModule extends AbstractModule {
         authService = new AuthServiceImpl(userRepository, tokenManager);
         AccountService accountService = new AccountServiceImpl(accountRepository);
         authController = new AuthController(authService);
-        accountController = new SecuredAccountController(accountService, authService);
+        accountController = new SecuredAccountController(accountService);
     }
 
     @Override

@@ -6,7 +6,6 @@ import net.yurimednikov.vertxbook.cashx.models.Account;
 import net.yurimednikov.vertxbook.cashx.models.AccountList;
 import net.yurimednikov.vertxbook.cashx.models.Pagination;
 import net.yurimednikov.vertxbook.cashx.services.AccountService;
-import net.yurimednikov.vertxbook.cashx.services.AuthService;
 import net.yurimednikov.vertxbook.cashx.validators.AccountValidator;
 
 import java.util.Optional;
@@ -14,12 +13,10 @@ import java.util.Optional;
 public class SecuredAccountController {
 
     private final AccountService service;
-    private final AuthService authService;
     private final AccountValidator validator;
 
-    public SecuredAccountController(AccountService service, AuthService authService) {
+    public SecuredAccountController(AccountService service) {
         this.service = service;
-        this.authService = authService;
         this.validator = new AccountValidator();
     }
 
@@ -40,7 +37,7 @@ public class SecuredAccountController {
 
     public void findAccountById (RoutingContext context){
         String idParam = context.pathParam("id");
-        long accountId = Long.valueOf(idParam);
+        long accountId = Long.parseLong(idParam);
         service.findAccountById(accountId)
                 .onFailure(context::fail)
                 .onSuccess(result -> {
@@ -71,7 +68,7 @@ public class SecuredAccountController {
 
     public void removeAccount(RoutingContext context){
         String idParam = context.pathParam("id");
-        long accountId = Long.valueOf(idParam);
+        long accountId = Long.parseLong(idParam);
         service.removeAccount(accountId)
                 .onFailure(context::fail)
                 .onSuccess(result -> {
