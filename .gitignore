@@ -29,3 +29,4 @@
 target/
 
 src/main/resources/minio.properties
+src/main/resources/jwt.properties

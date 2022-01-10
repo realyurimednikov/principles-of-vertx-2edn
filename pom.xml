@@ -44,10 +44,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-config</artifactId>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>io.vertx</groupId>-->
-<!--      <artifactId>vertx-auth-jwt</artifactId>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-web</artifactId>
@@ -56,10 +52,6 @@
       <groupId>io.vertx</groupId>
       <artifactId>vertx-pg-client</artifactId>
     </dependency>
-<!--    <dependency>-->
-<!--      <groupId>io.vertx</groupId>-->
-<!--      <artifactId>vertx-mail-client</artifactId>-->
-<!--    </dependency>-->
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-junit5</artifactId>
