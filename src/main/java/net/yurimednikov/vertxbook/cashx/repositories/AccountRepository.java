@@ -3,10 +3,7 @@ package net.yurimednikov.vertxbook.cashx.repositories;
 import java.util.Optional;
 
 import io.vertx.core.Future;
-import net.yurimednikov.vertxbook.cashx.models.Account;
-import net.yurimednikov.vertxbook.cashx.models.AccountList;
-import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
-import net.yurimednikov.vertxbook.cashx.models.Pagination;
+import net.yurimednikov.vertxbook.cashx.models.*;
 
 public interface AccountRepository {
     
@@ -24,4 +21,5 @@ public interface AccountRepository {
 
     Future<PagedAccountList> findAndPaginate (Long userId, Pagination pagination);
 
+    Future<AccountList> findAndSort (Long userId, Sort sort);
 }

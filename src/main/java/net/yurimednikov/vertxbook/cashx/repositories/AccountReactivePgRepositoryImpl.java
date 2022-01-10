@@ -13,10 +13,7 @@ import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.RowIterator;
 import io.vertx.sqlclient.SqlClient;
 import io.vertx.sqlclient.Tuple;
-import net.yurimednikov.vertxbook.cashx.models.Account;
-import net.yurimednikov.vertxbook.cashx.models.AccountList;
-import net.yurimednikov.vertxbook.cashx.models.PagedAccountList;
-import net.yurimednikov.vertxbook.cashx.models.Pagination;
+import net.yurimednikov.vertxbook.cashx.models.*;
 
 public class AccountReactivePgRepositoryImpl implements AccountRepository{
 
@@ -164,6 +161,18 @@ public class AccountReactivePgRepositoryImpl implements AccountRepository{
             List<Account> accounts = list.stream().skip(start).limit(pagination.getLimit()).collect(Collectors.toList());
             return new PagedAccountList(accounts, numberOfPages, pagination.getPage(), totalAccounts);
         });
+    }
+
+    @Override
+    public Future<AccountList> findAndSort(Long userId, Sort sort) {
+        String sql = "SELECT * FROM accounts WHERE account_userid = $1 ORDER BY $2 $3;";
+        Tuple tuple = Tuple.of(userId, sort.getFieldName(), sort.getOrder());
+        AccountRowMapper rowMapper = new AccountRowMapper();
+        return client.preparedQuery(sql)
+                .mapping(rowMapper)
+                .execute(tuple)
+                .map(rows -> StreamSupport.stream(rows.spliterator(), false).collect(Collectors.toList()))
+                .map(AccountList::new);
     }
 
 }
