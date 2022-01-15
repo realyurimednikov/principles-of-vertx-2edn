@@ -19,7 +19,7 @@
     <vertx.version>4.2.3</vertx.version>
     <junit-jupiter.version>5.7.0</junit-jupiter.version>
 
-    <main.verticle>net.yurimednikov.vertxbook.cashx.MainVerticle</main.verticle>
+    <main.verticle>net.yurimednikov.vertxbook.cashx.verticles.AppVerticle</main.verticle>
     <launcher.class>io.vertx.core.Launcher</launcher.class>
   </properties>
 
@@ -204,6 +204,72 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>com.github.eirslett</groupId>
+        <artifactId>frontend-maven-plugin</artifactId>
+        <version>1.12.1</version>
+        <configuration>
+          <!-- 1 -->
+          <workingDirectory>src/main/cashxapp</workingDirectory>
+          <!-- 2 -->
+          <nodeVersion>v16.13.2</nodeVersion>
+          <!-- 3 -->
+          <installDirectory>target</installDirectory>
+        </configuration>
+        <executions>
+          <!--4 -->
+          <execution>
+            <id>install node and npm</id>
+            <goals>
+              <goal>install-node-and-npm</goal>
+            </goals>
+          </execution>
+          <!-- 5 -->
+          <execution>
+            <id>run npm install command</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+          </execution>
+          <!-- 6 -->
+          <execution>
+            <id>run build command</id>
+            <goals>
+              <goal>npm</goal>
+            </goals>
+            <phase>generate-resources</phase>
+            <configuration>
+              <!-- 7 -->
+              <arguments>run build</arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>copy to webroot</id>
+            <!-- 1 -->
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <phase>process-resources</phase>
+            <configuration>
+              <!-- 2 -->
+              <outputDirectory>${project.build.outputDirectory}/webroot</outputDirectory>
+              <resources>
+                <resource>
+                  <!-- 3 -->
+                  <directory>${project.basedir}/src/main/cashxapp/dist</directory>
+                  <filtering>false</filtering>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
     </plugins>
   </build>
