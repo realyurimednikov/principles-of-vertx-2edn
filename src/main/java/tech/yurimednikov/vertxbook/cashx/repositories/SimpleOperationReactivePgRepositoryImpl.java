@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.sqlclient.Row;
 import io.vertx.sqlclient.SqlClient;
@@ -16,9 +17,19 @@ import tech.yurimednikov.vertxbook.cashx.models.SimpleOperationList;
 public class SimpleOperationReactivePgRepositoryImpl implements SimpleOperationRepository {
 
     private final SqlClient client;
+    private final Vertx vertx;
 
-    public SimpleOperationReactivePgRepositoryImpl(SqlClient client){
+    public SimpleOperationReactivePgRepositoryImpl(Vertx vertx, SqlClient client){
+
+        this.vertx = vertx;
         this.client = client;
+    }
+
+    public Future<Void> createTable(){
+        return vertx.fileSystem().readFile("sql/simple_operations.sql")
+                .map(Buffer::toString)
+                .compose(query -> client.query(query).execute())
+                .compose(result -> Future.succeededFuture());
     }
 
 

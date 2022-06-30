@@ -23,7 +23,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import tech.yurimednikov.vertxbook.cashx.models.SimpleOperation;
 
-@Disabled
 @ExtendWith(VertxExtension.class)
 @Testcontainers
 class SimpleOperationReactivePgRepositoryImplTest {
@@ -41,8 +40,9 @@ class SimpleOperationReactivePgRepositoryImplTest {
         String uri = "postgresql://user:secret@localhost:" + port + "/cashxdb";
 
         SqlClient client = PgPool.client(vertx, uri);
-        repository = new SimpleOperationReactivePgRepositoryImpl(client);
-        context.completeNow();
+        repository = new SimpleOperationReactivePgRepositoryImpl(vertx, client);
+        repository.createTable().onSuccess(r -> context.completeNow())
+                .onFailure(err -> context.failNow(err));
     }
 
     @Test
@@ -82,6 +82,7 @@ class SimpleOperationReactivePgRepositoryImplTest {
     }
 
     @Test
+    @Disabled
     void findSimpleOperationByIdTest (Vertx vertx, VertxTestContext context){
         // assume that account does exist in db
         SimpleOperation operation = new SimpleOperation(0, 1, "New operation", "income", "RSD", BigDecimal.valueOf(10000), LocalDateTime.now(), 1);
