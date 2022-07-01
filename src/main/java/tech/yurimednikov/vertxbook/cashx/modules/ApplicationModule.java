@@ -5,7 +5,6 @@ import com.google.inject.AbstractModule;
 import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.SqlClient;
-import tech.yurimednikov.vertxbook.cashx.errors.DependencyCreationException;
 import tech.yurimednikov.vertxbook.cashx.models.ApplicationConfiguration;
 import tech.yurimednikov.vertxbook.cashx.repositories.AccountReactivePgRepositoryImpl;
 import tech.yurimednikov.vertxbook.cashx.services.AccountService;
@@ -19,7 +18,7 @@ public class ApplicationModule extends AbstractModule {
     private final AccountService service;
     private final AccountController controller;
 
-    public ApplicationModule(Vertx vertx, ApplicationConfiguration configuration) throws DependencyCreationException {
+    public ApplicationModule(Vertx vertx, ApplicationConfiguration configuration) {
         SqlClient client = PgPool.client(vertx, configuration.getDatabaseUrl());
         this.repository = new AccountReactivePgRepositoryImpl(vertx, client);
         this.repository.createTable()
