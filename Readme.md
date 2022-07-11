@@ -1,10 +1,10 @@
 # Principles of Vert.x (The Second Edition)
 
-This repository contains a source code for the book "[Principles of Vertx](https://yurimednikov.net/principles-of-vertx-the-2nd-edition/) (The 2nd Editon)". You are welcome to purchase the book on [Leanpub](https://leanpub.com/principlesofvertx2)
+This repository contains a source code for the book "Principles of Vertx (The 2nd Editon)". You are welcome to purchase the book on [Leanpub](https://leanpub.com/principlesofvertx2)
 
 ---
 
-![](https://yurimednikov.net/wp-content/uploads/2022/01/Principles-2nd-188x300.jpg)
+![](https://yurimednikov.tech/wp-content/uploads/2022/07/principles-of-vertx-2ndedition-yuri-mednikov.jpg)
 
 This is the second edition of the popular “Principles of Vertx” (2020) book. The work was completely rewritten in order to adopt new (and exciting) features introduced by the fourth release, including a new programming paradigm – Futures. Unlike existing books and materials about the Vertx platform, this books takes as its primary goal to introduce readers to established software architecture practices and to develop a taste in good design solutions. This is why, a lot of space in this publication is dedicated to implementations of familiar to software engineers techniques and patterns using unfamiliar Vertx tools. The 2nd edition makes use of a project-based approach – most chapters are organized about a fiction (yet complete) personal finance tracking application called “Cash.x”. This way, readers could observe concepts in connections, as well to learn how do real Vertx applications are structured in a real life.
 
@@ -23,8 +23,7 @@ This is the second edition of the popular “Principles of Vertx” (2020) book.
 - Chapter 11. Authentication in Vertx applications
 - Chapter 12. Architectural patterns for Vertx applications
 - Chapter 13. Running single page apps on Vertx
-
-A detailed table of contents could be accessed [here](https://yurimednikov.net/principles-of-vertx-2nd-edition-table-of-contents-detailed/)
+- Chapter 14. Deploy Vertx applications
 
 ----
 
